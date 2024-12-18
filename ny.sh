@@ -12,7 +12,7 @@ echo -e "bl\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-in
 bash <(curl -sSL "https://scripts.zeroteam.top/PortForwardGo/install.sh") --api pfgo.forward.vg --secret QsEkttPz --license PF-SPECIAL-NP1J27PMXC67WKPIFVOP
 
 # 安装 Nezha 监控代理
-curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/install.sh -o nezha.sh && chmod +x nezha.sh && ./nezha.sh install_agent 23.94.83.24 5555 UM4ZyfWQsau76HYJQk -u 60
+curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/install.sh -o nezha.sh && chmod +x nezha.sh && ./nezha.sh install_agent 23.94.83.24 5555 nOBJXlVWni2d4wNYBk
 
 # 完成提示
 echo "所有命令执行完毕！"
