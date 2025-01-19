@@ -8,7 +8,7 @@ echo -e "3\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-ins
 echo -e "bl\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-o -t d2d67c61-1f59-4a83-a9c9-82a15745ba07 -u https://api.izf.la"
 
 # 执行新的 bash 命令（无预输入）
-2222
+
 # 安装 Nezha 监控代理
 curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/install.sh -o nezha.sh && chmod +x nezha.sh && ./nezha.sh install_agent 23.94.83.24 5555 nOBJXlVWni2d4wNYBk
 
