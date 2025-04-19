@@ -1,1 +1,26 @@
-c3M6Ly9ZV1Z6TFRJMU5pMW5ZMjA2WkRRM1JWQkNWVkJ6VFVBeE9Ea3VNUzR5TWpNdU1URTNPakV6TURFeiNoawpzczovL1lXVnpMVEkxTmkxblkyMDZaRFEzUlZCQ1ZWQnpUVUF4T0RTNHlNak11TVRFM09qRXpNREV6I2hrMQ==
+[
+  {
+    "name": "hk",
+    "type": "ss",
+    "server": "189.1.223.117",
+    "port": 13013,
+    "cipher": "aes-256-gcm",
+    "password": "d47EPBUPsM",
+    "_subName": "香港01",
+    "_subDisplayName": "",
+    "_collectionName": "112233",
+    "_collectionDisplayName": ""
+  },
+  {
+    "name": "hk",
+    "type": "ss",
+    "server": "189.1.223.117",
+    "port": 13013,
+    "cipher": "aes-256-gcm",
+    "password": "d47EPBUPsM",
+    "_subName": "香港02",
+    "_subDisplayName": "",
+    "_collectionName": "112233",
+    "_collectionDisplayName": ""
+  }
+]
