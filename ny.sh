@@ -2,6 +2,7 @@
 
 # 执行安装命令并自动输入
 echo -e "nyanpass\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t 90a1ff7e-b2a2-41d7-88ac-8e4d253086c9 -u https://ny.qwqa.link"
+echo -e "nuan\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-o -t 7a510a72-8f0e-45a6-8937-42c1c545ff9c -u https://materelay.com"
 
 # 执行新的 bash 命令（无预输入）
 
