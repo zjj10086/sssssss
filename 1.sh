@@ -9,11 +9,11 @@ echo "[INFO] 开始安装 DDNS..."
 bash <(wget -qO- https://raw.githubusercontent.com/mocchen/cssmeihua/mochen/shell/ddns.sh) <<EOF
 tutu119216@gmail.com
 6HuEmDY_BRwvHhbMSsESOie2IOKM61Qvahw0pB8f
-# IPv4 域名留空，直接回车跳过
-n
+
+y
 aws1485-28-12wa.484845845.xyz
 y
-8371117300:AAHHMYPBTx8SAxhfexcw3jTcUqQMVVSOuDc
+8371117300:AAHHMYPBTx8SAxhfexcw3jTcQMVVSOuDc
 6133126873
 EOF
 
