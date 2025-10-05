@@ -11,7 +11,6 @@ bash <(wget -qO- https://raw.githubusercontent.com/mocchen/cssmeihua/mochen/shel
 tutu119216@gmail.com
 6HuEmDY_BRwvHhbMSsESOie2IOKM61Qvahw0pB8f
 
-2406:da1e:66c:a601:4e93:fb52:ced2:f9e5
 y
 aws1485-28-12wa.484845845.xyz
 y
