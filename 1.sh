@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# ===========================
-# 自动安装 DDNS + Nyanpass + Nezha
-# ===========================
+######################################
+# 一键安装 IPv6 DDNS + Nyanpass + Nezha
+# 作者: ChatGPT整理
+######################################
 
 # --- 1. 安装并配置 DDNS (Cloudflare + Telegram) ---
 echo "[INFO] 开始安装 DDNS..."
@@ -10,6 +11,7 @@ bash <(wget -qO- https://raw.githubusercontent.com/mocchen/cssmeihua/mochen/shel
 tutu119216@gmail.com
 6HuEmDY_BRwvHhbMSsESOie2IOKM61Qvahw0pB8f
 
+2406:da1e:66c:a601:4e93:fb52:ced2:f9e5
 y
 aws1485-28-12wa.484845845.xyz
 y
@@ -17,7 +19,7 @@ y
 6133126873
 EOF
 
-echo "[INFO] DDNS 配置完成！"
+echo "[INFO] IPv6 DDNS 配置完成！"
 
 # --- 2. 安装 Nyanpass ---
 echo "[INFO] 开始安装 Nyanpass..."
@@ -31,4 +33,4 @@ chmod +x nezha.sh
 ./nezha.sh install_agent 23.94.83.24 5555 oer1NSgoX8i6DRmgW0
 
 # --- 4. 完成提示 ---
-echo "[INFO] 所有命令执行完毕！"
+echo "[INFO] 所有安装完成！请检查日志确认是否成功。"
