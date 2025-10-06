@@ -8,7 +8,7 @@ set -o pipefail
 # ------------------------
 
 # 配置区域
-CFKEY="6HuEmDY_BRwvHhbMSsESOie2IOKM61Qvahw0pB8f"
+CFKEY="38e311293d6b1d98a8b52375b5ebc3974d9a1"
 CFUSER="tutu119216@gmail.com"
 CFZONE_NAME="484845845.xyz"
 CFRECORD_NAME="aws1485-28-12wa.484845845.xyz"
