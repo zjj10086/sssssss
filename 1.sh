@@ -43,7 +43,7 @@ CFRECORD_NAME=aws1485-28-12wa.484845845.xyz
 CFRECORD_TYPE=AAAA
 
 # Cloudflare TTL for record, between 120 and 86400 seconds
-CFTTL=120
+CFTTL=60
 
 # Ignore local file, update ip anyway
 FORCE=false
