@@ -59,3 +59,56 @@ echo "✅ 哪吒探针已连接"
 echo ""
 echo "📜 日志文件：/root/1.log"
 echo "🕒 定时任务：每分钟自动执行 /root/1.sh"
+
+cat > /etc/sysctl.conf << EOF
+# 原有配置保持不变
+fs.file-max = 6815744
+net.ipv4.tcp_no_metrics_save=1
+net.ipv4.tcp_ecn=0
+net.ipv4.tcp_frto=0
+net.ipv4.tcp_mtu_probing=0
+net.ipv4.tcp_rfc1337=0
+net.ipv4.tcp_sack=1
+net.ipv4.tcp_fack=1
+net.ipv4.tcp_window_scaling=1
+net.ipv4.tcp_adv_win_scale=1
+net.ipv4.tcp_moderate_rcvbuf=1
+
+# 5G 带宽环境优化参数（约 37.5MB 缓冲）
+net.core.rmem_max=37500000
+net.core.wmem_max=37500000
+net.ipv4.tcp_rmem=4096 262144 37500000
+net.ipv4.tcp_wmem=4096 262144 37500000
+
+net.ipv4.udp_rmem_min=8192
+net.ipv4.udp_wmem_min=8192
+
+net.ipv4.ip_forward=1
+net.ipv4.conf.all.route_localnet=1
+net.ipv4.conf.all.forwarding=1
+net.ipv4.conf.default.forwarding=1
+
+net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbr
+
+net.ipv6.conf.all.forwarding=1
+net.ipv6.conf.default.forwarding=1
+
+# 新增IPv6同等参数（与IPv4配置对应）
+# 1. 允许IPv6本地网络路由
+net.ipv6.conf.all.route_localnet=1
+net.ipv6.conf.default.route_localnet=1
+
+# 2. IPv6 TCP/UDP缓冲区默认继承全局core参数（无需额外设置）
+
+# 3. IPv6反向路径过滤（与IPv4安全策略对齐）
+net.ipv6.conf.all.rp_filter=1
+net.ipv6.conf.default.rp_filter=1
+
+# 4. 禁用IPv6 ECN（与IPv4对齐）
+net.ipv6.tcp_ecn=0
+
+# 5. 允许IPv6回环接口转发
+net.ipv6.conf.lo.forwarding=1
+EOF
+sysctl -p && sysctl --system
