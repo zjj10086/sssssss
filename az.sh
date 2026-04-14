@@ -80,7 +80,7 @@ sysctl --system
 ####################################
 
 echo "🚀 开始下载 /root/azjx.sh ..."
-curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/1.sh -o /root/azjx.sh
+curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/azjx.sh
 chmod +x /root/azjx.sh
 
 echo "🕒 正在写入定时任务..."
