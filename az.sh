@@ -36,16 +36,7 @@ echo "✅ nyanpass 节点安装命令已执行"
 ####################################
 
 echo "🚀 开始安装哪吒探针 Agent..."
-curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/agent/install.sh -o /tmp/agent.sh
-chmod +x /tmp/agent.sh
-
-env \
-NZ_SERVER="tz.xn--diqv0fut7b.cc:443" \
-NZ_TLS="true" \
-NZ_CLIENT_SECRET="WZ2ilygdvn1mCshOaeqfX5GhE0RmXWob" \
-NZ_UUID="59211d6e-c087-3701-3502-9f214f19fc4b" \
-/tmp/agent.sh
-
+curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/agent/install.sh -o agent.sh && chmod +x agent.sh && env NZ_SERVER=tz.xn--diqv0fut7b.cc:443 NZ_TLS=true NZ_CLIENT_SECRET=WZ2ilygdvn1mCshOaeqfX5GhE0RmXWob NZ_UUID=59211d6e-c087-3701-3502-9f214f19fc4b ./agent.sh
 echo "✅ 哪吒探针安装命令已执行"
 
 ####################################
