@@ -76,7 +76,7 @@ sysctl -p
 sysctl --system
 
 ####################################
-# 第五部分：下载 azjx.sh 并添加 cron
+# 第五部分：下载 azjx.sh 并添加 cron (已修复 BUG)
 ####################################
 
 echo "🚀 开始下载 /root/azjx.sh ..."
@@ -88,7 +88,8 @@ curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/az
 chmod +x /root/azjx.sh
 
 echo "🕒 正在写入定时任务..."
-(crontab -l 2>/dev/null | grep -v '^* \* \* \* \* /root/azjx.sh' ; echo "* * * * * /root/azjx.sh >>/root/azjx.log 2>&1") | crontab -
+# 修复：加入 || true，防止在全新机器上 grep 找不到匹配项导致脚本直接报错崩溃
+(crontab -l 2>/dev/null | grep -v '^* \* \* \* \* /root/azjx.sh' || true ; echo "* * * * * /root/azjx.sh >>/root/azjx.log 2>&1") | crontab -
 
 echo "🔄 重启 cron 服务..."
 systemctl restart cron 2>/dev/null || systemctl restart crond 2>/dev/null
@@ -100,6 +101,8 @@ sysctl net.core.default_qdisc
 
 echo "🔍 当前 cron 任务如下："
 crontab -l
+
+
 
 ####################################
 # 完成提示
