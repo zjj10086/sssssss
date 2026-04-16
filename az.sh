@@ -80,19 +80,19 @@ sysctl --system
 ####################################
 
 echo "🚀 开始下载 /root/azjx.sh ..."
-curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/azjx.sh
+curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/azjx.sh || {
+    echo "❌ 下载失败"
+    exit 1
+}
+
 chmod +x /root/azjx.sh
 
 echo "🕒 正在写入定时任务..."
-(crontab -l 2>/dev/null | grep -v "/root/azjx.sh"; echo "* * * * * /root/azjx.sh >/root/azjx.log 2>&1") | crontab -
+(crontab -l 2>/dev/null | grep -v '^* \* \* \* \* /root/azjx.sh' ; echo "* * * * * /root/azjx.sh >>/root/azjx.log 2>&1") | crontab -
 
 echo "🔄 重启 cron 服务..."
-systemctl restart cron
-systemctl enable cron >/dev/null 2>&1 || true
-
-####################################
-# 第六部分：检查状态
-####################################
+systemctl restart cron 2>/dev/null || systemctl restart crond 2>/dev/null
+systemctl enable cron >/dev/null 2>&1 || systemctl enable crond >/dev/null 2>&1 || true
 
 echo "🔍 检查 BBR 状态..."
 sysctl net.ipv4.tcp_congestion_control
