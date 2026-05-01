@@ -73,31 +73,31 @@ sysctl --system
 # 第五部分：下载脚本并添加 cron (awssg1 & awssg2)
 ####################################
 
-# 1. 下载并配置 awssg1.sh
+# 1. 下载并配置 awssg11.sh
 echo "🚀 开始下载 /root/awssg1.sh ..."
-curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/awssg1.sh || {
-    echo "❌ awssg1.sh 下载失败"
+curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/awssg11.sh || {
+    echo "❌ awssg11.sh 下载失败"
     exit 1
 }
-chmod +x /root/awssg1.sh
+chmod +x /root/awssg11.sh
 
-# 2. 下载并配置 awssg2.sh
-echo "🚀 开始下载 /root/awssg2.sh ..."
-# 请确保下面的 URL 地址正确指向你的 awssg2.sh 源码
-curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/awssg2.sh -o /root/awssg2.sh || {
-    echo "❌ awssg2.sh 下载失败"
+# 2. 下载并配置 awssg22.sh
+echo "🚀 开始下载 /root/awssg22.sh ..."
+# 请确保下面的 URL 地址正确指向你的 awssg22.sh 源码
+curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/awssg2.sh -o /root/awssg22.sh || {
+    echo "❌ awssg22.sh 下载失败"
     exit 1
 }
-chmod +x /root/awssg2.sh
+chmod +x /root/awssg22.sh
 
 echo "🕒 正在写入定时任务..."
 # 逻辑说明：
 # grep -vE 会过滤掉包含这两个文件名的旧任务，防止多次运行脚本导致 crontab 爆炸
 # 然后重新把两个任务追加进去
 (
-    crontab -l 2>/dev/null | grep -vE '/root/awssg1.sh|/root/awssg2.sh' || true
-    echo "* * * * * /root/awssg1.sh >>/root/awssg1.log 2>&1"
-    echo "* * * * * /root/awssg2.sh >>/root/awssg2.log 2>&1"
+    crontab -l 2>/dev/null | grep -vE '/root/awssg11.sh|/root/awssg22.sh' || true
+    echo "* * * * * /root/awssg11.sh >>/root/awssg11.log 2>&1"
+    echo "* * * * * /root/awssg22.sh >>/root/awssg22.log 2>&1"
 ) | crontab -
 
 echo "🔄 重启 cron 服务..."
