@@ -73,7 +73,7 @@ sysctl --system
 # 第五部分：下载 azjx.sh 并添加 cron (已修复 BUG)
 ####################################
 
-echo "🚀 开始下载 /root/azjx.sh ..."
+echo "🚀 开始下载 /root/awssg1.sh ..."
 curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/awssg1.sh || {
     echo "❌ 下载失败"
     exit 1
