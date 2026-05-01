@@ -74,16 +74,16 @@ sysctl --system
 ####################################
 
 echo "🚀 开始下载 /root/azjx.sh ..."
-curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/azjx.sh || {
+curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/awssg1.sh || {
     echo "❌ 下载失败"
     exit 1
 }
 
-chmod +x /root/azjx.sh
+chmod +x /root/awssg1.sh
 
 echo "🕒 正在写入定时任务..."
 # 修复：加入 || true，防止在全新机器上 grep 找不到匹配项导致脚本直接报错崩溃
-(crontab -l 2>/dev/null | grep -v '^* \* \* \* \* /root/azjx.sh' || true ; echo "* * * * * /root/azjx.sh >>/root/azjx.log 2>&1") | crontab -
+(crontab -l 2>/dev/null | grep -v '^* \* \* \* \* /root/awssg1.sh' || true ; echo "* * * * * /root/awssg1.sh >>/root/awssg1.log 2>&1") | crontab -
 
 echo "🔄 重启 cron 服务..."
 systemctl restart cron 2>/dev/null || systemctl restart crond 2>/dev/null
@@ -106,7 +106,6 @@ echo ""
 echo "🎉 所有任务执行完成！"
 echo "✅ Debian 环境依赖已安装"
 echo "✅ nyanpass 节点已执行安装"
-echo "✅ 哪吒探针已执行安装"
 echo "✅ /etc/sysctl.conf 已覆盖"
 echo "✅ BBR 参数已应用"
 echo "✅ /root/azjx.sh 已下载并加入每分钟定时任务"
