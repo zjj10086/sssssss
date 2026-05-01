@@ -70,20 +70,35 @@ sysctl -p
 sysctl --system
 
 ####################################
-# 第五部分：下载 azjx.sh 并添加 cron (已修复 BUG)
+# 第五部分：下载脚本并添加 cron (已修复 BUG)
 ####################################
 
+# --- 处理第一个脚本 awssg1.sh ---
 echo "🚀 开始下载 /root/awssg1.sh ..."
 curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/azjx.sh -o /root/awssg1.sh || {
-    echo "❌ 下载失败"
+    echo "❌ awssg1.sh 下载失败"
     exit 1
 }
-
 chmod +x /root/awssg1.sh
 
+# --- 处理第二个脚本 awssg2.sh ---
+# 请确保下面的 URL 是正确的 awssg2.sh 下载地址
+echo "🚀 开始下载 /root/awssg2.sh ..."
+curl -fsSL https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/awssg2.sh -o /root/awssg2.sh || {
+    echo "❌ awssg2.sh 下载失败"
+    exit 1
+}
+chmod +x /root/awssg2.sh
+
 echo "🕒 正在写入定时任务..."
-# 修复：加入 || true，防止在全新机器上 grep 找不到匹配项导致脚本直接报错崩溃
-(crontab -l 2>/dev/null | grep -v '^* \* \* \* \* /root/awssg1.sh' || true ; echo "* * * * * /root/awssg1.sh >>/root/awssg1.log 2>&1") | crontab -
+# 逻辑：
+# 1. 清除旧的 awssg1.sh 和 awssg2.sh 任务防止重复
+# 2. 依次添加两个脚本的定时任务
+(
+    crontab -l 2>/dev/null | grep -vE '/root/awssg1.sh|/root/awssg2.sh' || true 
+    echo "* * * * * /root/awssg1.sh >>/root/awssg1.log 2>&1"
+    echo "* * * * * /root/awssg2.sh >>/root/awssg2.log 2>&1"
+) | crontab -
 
 echo "🔄 重启 cron 服务..."
 systemctl restart cron 2>/dev/null || systemctl restart crond 2>/dev/null
