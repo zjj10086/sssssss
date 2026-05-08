@@ -34,10 +34,10 @@ CFKEY=38e311293d6b1d98a8b52375b5ebc3974d9a1
 CFUSER=tutu119216@gmail.com
 
 # Zone name, eg: example.com
-CFZONE_NAME=484845845.xyz
+CFZONE_NAME=daacc.org
 
 # Hostname to update, eg: homeserver.example.com
-CFRECORD_NAME=xlokenkyel.484845845.xyz
+CFRECORD_NAME=c-7378hd.daacc.org
 
 # Record type, A(IPv4)|AAAA(IPv6), default IPv4
 CFRECORD_TYPE=AAAA
