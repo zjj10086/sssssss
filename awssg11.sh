@@ -37,7 +37,7 @@ CFUSER=tutu119216@gmail.com
 CFZONE_NAME=daacc.org
 
 # Hostname to update, eg: homeserver.example.com
-CFRECORD_NAME=c-7378hd.daacc.org
+CFRECORD_NAME=c100.daacc.org
 
 # Record type, A(IPv4)|AAAA(IPv6), default IPv4
 CFRECORD_TYPE=A
