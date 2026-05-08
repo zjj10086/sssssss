@@ -37,7 +37,7 @@ CFUSER=tutu119216@gmail.com
 CFZONE_NAME=484845845.xyz
 
 # Hostname to update, eg: homeserver.example.com
-CFRECORD_NAME=ad14848.484845845.xyz
+CFRECORD_NAME=xlokenkyel.484845845.xyz
 
 # Record type, A(IPv4)|AAAA(IPv6), default IPv4
 CFRECORD_TYPE=A
