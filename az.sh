@@ -33,13 +33,16 @@ echo -e "1\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-ins
 echo "✅ nyanpass 节点安装命令已执行"
 
 ####################################
-# 第三部分：安装哪吒探针 Agent
+# 第三部分：安装 Komari Agent
 ####################################
 
-echo "🚀 开始安装哪吒探针 Agent..."
-curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/agent/install.sh -o agent.sh && chmod +x agent.sh && env NZ_SERVER=tz.xn--diqv0fut7b.cc:443 NZ_TLS=true NZ_CLIENT_SECRET=WZ2ilygdvn1mCshOaeqfX5GhE0RmXWob NZ_UUID=59211d6e-c087-3701-3502-9f214f19fc4b ./agent.sh
-echo "✅ 哪吒探针安装命令已执行"
+echo "🚀 开始安装 Komari Agent..."
+wget -qO- https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.sh | sudo bash -s -- \
+  -e https://tz.xn--diqv0fut7b.cc \
+  -t MqEtF56KG8h0PZ5Axrk5zI
+echo "✅ Komari Agent 安装命令已执行"
 ####################################
+
 # 第四部分：安装 RelayX
 ####################################
 
@@ -124,7 +127,7 @@ echo ""
 echo "🎉 所有任务执行完成！"
 echo "✅ Debian 环境依赖已安装"
 echo "✅ nyanpass 节点已执行安装"
-echo "✅ 哪吒探针已执行安装"
+echo "✅ Komari Agent针已执行安装"
 echo "✅ /etc/sysctl.conf 已覆盖"
 echo "✅ BBR 参数已应用"
 echo "✅ /root/azjx.sh 已下载并加入每分钟定时任务"
