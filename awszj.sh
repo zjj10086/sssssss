@@ -33,11 +33,7 @@ echo "✅ nyanpass 节点安装命令已执行"
 
 ####################################
 # 第三部分：安装哪吒探针 Agent
-####################################
 
-echo "🚀 开始安装哪吒探针 Agent..."
-curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/agent/install.sh -o agent.sh && chmod +x agent.sh && env NZ_SERVER=tz.xn--diqv0fut7b.cc:443 NZ_TLS=true NZ_CLIENT_SECRET=WZ2ilygdvn1mCshOaeqfX5GhE0RmXWob NZ_UUID=ac745083-aee5-4715-814a-d1eb1d2788f0 ./agent.sh
-echo "✅ 哪吒探针安装命令已执行"
 
 ####################################
 # 第四部分：覆盖 /etc/sysctl.conf
