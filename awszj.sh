@@ -32,10 +32,14 @@ echo -e "nyanpass\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanp
 echo -e "1\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t e2cffc11-ba17-4de5-8d17-7b5719d43680 -u https://ny.qwqa.link"
 echo "✅ nyanpass 节点安装命令已执行"
 
+# 第三部分：安装 Komari Agent
 ####################################
-# 第三部分：安装哪吒探针 Agent
 
-
+echo "🚀 开始安装 Komari Agent..."
+wget -qO- https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.sh | sudo bash -s -- \
+  -e https://tz.xn--diqv0fut7b.cc \
+  -t fPz3KdypsEuJjNLhhusIn6
+echo "✅ Komari Agent 安装命令已执行"
 ####################################
 # 第四部分：覆盖 /etc/sysctl.conf
 ####################################
