@@ -29,6 +29,7 @@ apt install -y curl wget cron ca-certificates
 
 echo "🚀 开始安装 nyanpass 节点..."
 echo -e "nyanpass\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t 90a1ff7e-b2a2-41d7-88ac-8e4d253086c9 -u https://ny.qwqa.link"
+echo -e "1\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t e2cffc11-ba17-4de5-8d17-7b5719d43680 -u https://ny.qwqa.link"
 echo "✅ nyanpass 节点安装命令已执行"
 
 ####################################
