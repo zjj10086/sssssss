@@ -77,6 +77,7 @@ SETTINGS: dict[str, Any] = {
     "REPLACE_COOLDOWN_SECONDS": 300,
     "POST_REPLACE_GRACE_SECONDS": 90,
     "POST_IPV6_REPLACE_GRACE_SECONDS": 180,
+    "IPV4_UPDATE_WAIT_SECONDS": 60,
     "MAX_REPLACEMENTS_PER_HOUR": 3,
     "API_TIMEOUT_SECONDS": 30,
     "STATE_FILE": "/var/lib/aws-gfw-watch/state.json",
@@ -164,6 +165,7 @@ class WatchState:
     consecutive_failures_v6: int = 0
     replacement_times_v6: list[float] = dataclasses.field(default_factory=list)
     pending_ipv6_cleanup: dict[str, Any] = dataclasses.field(default_factory=dict)
+    pending_ipv4_notification: dict[str, Any] = dataclasses.field(default_factory=dict)
 
     @classmethod
     def load(cls, path: Path, now: float) -> "WatchState":
@@ -191,6 +193,11 @@ class WatchState:
                     if isinstance(payload.get("pending_ipv6_cleanup"), dict)
                     else {}
                 ),
+                pending_ipv4_notification=(
+                    payload.get("pending_ipv4_notification", {})
+                    if isinstance(payload.get("pending_ipv4_notification"), dict)
+                    else {}
+                ),
             )
         except (FileNotFoundError, PermissionError, ValueError, TypeError, json.JSONDecodeError):
             return cls()
@@ -204,6 +211,7 @@ class WatchState:
             "consecutive_failures_v6": self.consecutive_failures_v6,
             "replacement_times_v6": self.replacement_times_v6,
             "pending_ipv6_cleanup": self.pending_ipv6_cleanup,
+            "pending_ipv4_notification": self.pending_ipv4_notification,
         }
         fd, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
         temporary = Path(temporary_name)
@@ -237,6 +245,7 @@ class Config:
     cooldown_seconds: float
     post_replace_grace_seconds: float
     post_ipv6_replace_grace_seconds: float
+    ipv4_update_wait_seconds: float
     max_replacements_per_hour: int
     api_timeout: float
     replacement_check_port: int | None
@@ -295,6 +304,9 @@ class Config:
             ),
             post_ipv6_replace_grace_seconds=env_float(
                 "POST_IPV6_REPLACE_GRACE_SECONDS", 180, minimum=30
+            ),
+            ipv4_update_wait_seconds=env_float(
+                "IPV4_UPDATE_WAIT_SECONDS", 60, minimum=10, maximum=300
             ),
             max_replacements_per_hour=env_int(
                 "MAX_REPLACEMENTS_PER_HOUR", 3, minimum=1, maximum=20
@@ -977,16 +989,19 @@ class Watcher:
             f"{len(self.config.china_targets_v6)} 个"
         )
 
-    def _notify_bark(self, title: str, body: str) -> None:
+    def _notify_bark(self, title: str, body: str) -> bool:
         if not self.config.bark_url:
-            return
+            return False
         try:
             if send_bark(self.config, title, body):
                 log(f"Bark 已发送：{title}")
+                return True
             else:
                 log(f"Bark 未发送：{title}")
+                return False
         except RuntimeError as error:
             log(str(error))
+            return False
 
     def _replacement_times(self, address_type: str) -> list[float]:
         return (
@@ -1027,6 +1042,107 @@ class Watcher:
 
     def _save_state(self) -> None:
         self.state.save(self.config.state_file)
+
+    def _record_pending_ipv4_notification(self, old_address: str) -> None:
+        self.state.pending_ipv4_notification = {
+            "instanceId": self.instance_id,
+            "region": self.region,
+            "oldAddress": old_address,
+            "time": self.clock(),
+        }
+        self._save_state()
+
+    @staticmethod
+    def _changed_ipv4(candidate: str, old_address: str) -> str:
+        try:
+            address = ipaddress.ip_address(candidate.strip())
+        except ValueError:
+            return ""
+        if address.version != 4:
+            return ""
+        normalized = str(address)
+        if normalized == old_address.strip():
+            return ""
+        return normalized
+
+    def _find_new_ipv4(
+        self, old_address: str, response_payload: Any = None
+    ) -> str:
+        response_address = ipv4_from_payload(response_payload)
+        if response_address:
+            # The replacement endpoint's returned address is authoritative,
+            # including when the old address could not be read beforehand.
+            changed = self._changed_ipv4(response_address, old_address)
+            if changed or old_address == "未知":
+                return response_address
+
+        try:
+            metadata_address = imds_get("meta-data/public-ipv4").strip()
+        except ConfigurationError:
+            metadata_address = ""
+        changed = self._changed_ipv4(metadata_address, old_address)
+        if changed:
+            return changed
+
+        try:
+            instance = self.client.get_instance(self.instance_id, self.region)
+        except ApiError:
+            return ""
+        return self._changed_ipv4(ipv4_from_payload(instance), old_address)
+
+    def _finish_pending_ipv4_notification(self, new_address: str) -> bool:
+        pending = self.state.pending_ipv4_notification
+        if not pending:
+            return False
+        old_address = str(pending.get("oldAddress") or "未知").strip()
+        body = (
+            f"实例：{pending.get('instanceId') or self.instance_id}\n"
+            f"区域：{pending.get('region') or self.region}\n"
+            f"原 IPv4：{old_address}\n"
+            f"新 IPv4：{new_address}"
+        )
+        if self.config.bark_url and not self._notify_bark("AWS IPv4 已更换", body):
+            log(f"新 IPv4 已确认：{new_address}；Bark 发送失败，下轮重试")
+            return False
+        self.state.pending_ipv4_notification = {}
+        self._save_state()
+        if not self.config.bark_url:
+            log(f"新 IPv4 已确认：{new_address}")
+        return True
+
+    def _wait_and_notify_new_ipv4(
+        self, old_address: str, response_payload: Any
+    ) -> bool:
+        deadline = time.monotonic() + self.config.ipv4_update_wait_seconds
+        while not self.stop_event.is_set():
+            new_address = self._find_new_ipv4(old_address, response_payload)
+            response_payload = None
+            if new_address:
+                return self._finish_pending_ipv4_notification(new_address)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            self.stop_event.wait(min(5, remaining))
+        log(
+            "AWS 暂未返回新的 IPv4，已保存待通知任务；"
+            "下一轮确认新地址后再发送 Bark"
+        )
+        return False
+
+    def _resume_pending_ipv4_notification(self) -> bool:
+        pending = self.state.pending_ipv4_notification
+        if not pending:
+            return False
+        old_address = str(pending.get("oldAddress") or "未知").strip()
+        if old_address == "未知":
+            log("待通知任务缺少原 IPv4，无法安全确认地址已变化")
+            return True
+        new_address = self._find_new_ipv4(old_address)
+        if not new_address:
+            log(f"新 IPv4 尚未确认（原地址 {old_address}），下轮继续检查")
+            return True
+        self._finish_pending_ipv4_notification(new_address)
+        return True
 
     def _record_pending_ipv6_cleanup(
         self, old_addresses: list[str], new_address: str
@@ -1118,13 +1234,23 @@ class Watcher:
             try:
                 old_public_ip = imds_get("meta-data/public-ipv4").strip()
             except ConfigurationError:
-                pass
+                try:
+                    old_public_ip = (
+                        ipv4_from_payload(
+                            self.client.get_instance(self.instance_id, self.region)
+                        )
+                        or "未知"
+                    )
+                except ApiError:
+                    pass
 
         # Record before making the non-idempotent request. A public-IP change can
         # tear down the response connection even though the API accepted it.
         replacement_times.append(now)
         self._set_replacement_times(address_type, replacement_times)
         self._set_failure_count(address_type, 0)
+        if address_type == "ipv4":
+            self._record_pending_ipv4_notification(old_public_ip)
         self._save_state()
         log(f"确认疑似被墙，正在请求更换公网 {label}……")
         try:
@@ -1160,14 +1286,7 @@ class Watcher:
                     f"{cleanup_text}",
                 )
             else:
-                new_public_ip = ipv4_from_payload(result) or "等待更新"
-                self._notify_bark(
-                    "AWS IPv4 已更换",
-                    f"实例：{self.instance_id}\n"
-                    f"区域：{self.region}\n"
-                    f"原 IPv4：{old_public_ip}\n"
-                    f"新 IPv4：{new_public_ip}",
-                )
+                self._wait_and_notify_new_ipv4(old_public_ip, result)
         except AmbiguousApiError as error:
             log(str(error))
             self._notify_bark(
@@ -1182,6 +1301,8 @@ class Watcher:
             # not consume the hourly replacement allowance.
             replacement_times.pop()
             self._set_replacement_times(address_type, replacement_times)
+            if address_type == "ipv4":
+                self.state.pending_ipv4_notification = {}
             self._save_state()
             self._notify_bark(
                 f"AWS {label} 换 IP 失败",
@@ -1242,6 +1363,7 @@ class Watcher:
         return failure_count >= self.config.failure_cycles
 
     def run_round(self) -> bool:
+        self._resume_pending_ipv4_notification()
         pending_ipv6_cleanup = self._resume_pending_ipv6_cleanup()
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             ipv4_future = executor.submit(
