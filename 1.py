@@ -69,11 +69,12 @@ SETTINGS: dict[str, Any] = {
     ),
     "MIN_CONTROL_SUCCESS": 1,
     "TCP_TIMEOUT_SECONDS": 3,
-    "TCP_ATTEMPTS": 2,
+    # 每两分钟一轮；每轮内每个目标连续检测 10 次。
+    "TCP_ATTEMPTS": 10,
     "CHECK_INTERVAL_SECONDS": 120,
     "FAILURE_RATIO": 0.67,
-    # 连续失败超过 9 轮，即第 10 轮触发换 IP。
-    "FAILURE_CYCLES": 10,
+    # 单轮达到条件立即换 IP，不跨两分钟轮次累计。
+    "FAILURE_CYCLES": 1,
     "REPLACE_COOLDOWN_SECONDS": 300,
     "POST_REPLACE_GRACE_SECONDS": 90,
     "POST_IPV6_REPLACE_GRACE_SECONDS": 180,
@@ -292,10 +293,10 @@ class Config:
             china_targets_v6=china_targets_v6,
             control_targets_v6=control_targets_v6,
             tcp_timeout=env_float("TCP_TIMEOUT_SECONDS", 3, minimum=0.2, maximum=30),
-            tcp_attempts=env_int("TCP_ATTEMPTS", 2, minimum=1, maximum=10),
+            tcp_attempts=env_int("TCP_ATTEMPTS", 10, minimum=1, maximum=10),
             interval_seconds=env_float("CHECK_INTERVAL_SECONDS", 60, minimum=5),
             failure_ratio=failure_ratio,
-            failure_cycles=env_int("FAILURE_CYCLES", 3, minimum=1, maximum=100),
+            failure_cycles=env_int("FAILURE_CYCLES", 1, minimum=1, maximum=100),
             min_control_success=min_control_success,
             cooldown_seconds=env_float("REPLACE_COOLDOWN_SECONDS", 300, minimum=30),
             post_replace_grace_seconds=env_float(
@@ -470,7 +471,7 @@ def probe_target(
         target=target,
         ok=False,
         elapsed_ms=round((time.monotonic() - started) * 1000),
-        error=last_error[:160],
+        error=f"{attempts}/{attempts} 次失败：{last_error[:130]}",
     )
 
 
@@ -985,7 +986,8 @@ class Watcher:
         log(
             f"监控实例 {self.instance_id} / {self.region}，"
             f"IPv4/IPv6 国内目标各 {len(self.config.china_targets)} / "
-            f"{len(self.config.china_targets_v6)} 个"
+            f"{len(self.config.china_targets_v6)} 个，"
+            f"每轮每个目标检测 {self.config.tcp_attempts} 次"
         )
 
     def _notify_bark(self, title: str, body: str) -> bool:
@@ -1352,7 +1354,20 @@ class Watcher:
             )
             return False
 
-        failure_count = self._failure_count(address_type) + 1
+        if self.config.failure_cycles == 1:
+            self._set_failure_count(address_type, 0)
+            self._save_state()
+            log(
+                f"{label} 国内失败 {decision.china_failures}/{len(china_results)}，"
+                f"本轮每个目标连续检测 {self.config.tcp_attempts} 次仍失败，"
+                "立即换 IP"
+            )
+            return True
+
+        failure_count = min(
+            self._failure_count(address_type) + 1,
+            self.config.failure_cycles,
+        )
         self._set_failure_count(address_type, failure_count)
         self._save_state()
         log(
@@ -1407,6 +1422,7 @@ class Watcher:
     def run(self, once: bool = False) -> None:
         self.initialize()
         while not self.stop_event.is_set():
+            round_started = time.monotonic()
             replaced = False
             try:
                 replaced = self.run_round()
@@ -1416,15 +1432,15 @@ class Watcher:
                 log(f"本轮检测异常：{type(error).__name__}: {error}")
             if once:
                 return
-            delay = (
-                (
+            if replaced:
+                delay = (
                     self.config.post_ipv6_replace_grace_seconds
                     if self.last_replacement_type == "ipv6"
                     else self.config.post_replace_grace_seconds
                 )
-                if replaced
-                else self.config.interval_seconds
-            )
+            else:
+                elapsed = time.monotonic() - round_started
+                delay = max(0, self.config.interval_seconds - elapsed)
             self.stop_event.wait(delay)
 
 
