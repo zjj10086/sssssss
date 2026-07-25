@@ -90,13 +90,6 @@ if missing:
     raise SystemExit(f"下载的 Python 脚本缺少必要内容：{','.join(missing)}")
 PY
 
-if systemctl is-active --quiet aws-gfw-watch 2>/dev/null; then
-    echo "ℹ️ 检测到旧版 aws-gfw-watch 正在运行，跳过会争用锁的 dry-run"
-else
-    echo "🧪 正在执行一次安全检测（dry-run，不会换 IP）..."
-    python3 "${AWS_GFW_WATCH_PATH}" --once --dry-run
-fi
-
 echo "⚙️ 正在安装并启动 aws-gfw-watch systemd 服务..."
 rm -f -- "/opt/aws-gfw-watch/aws_gfw_watch.py" "/opt/aws-gfw-watch/1.py"
 python3 "${AWS_GFW_WATCH_PATH}" --install
