@@ -2,14 +2,7 @@
 set -Eeuo pipefail
 
 AWS_GFW_WATCH_URL="https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/1.py"
-AWS_GFW_WATCH_TMP=""
-
-cleanup() {
-    if [ -n "${AWS_GFW_WATCH_TMP}" ] && [ -f "${AWS_GFW_WATCH_TMP}" ]; then
-        rm -f -- "${AWS_GFW_WATCH_TMP}"
-    fi
-}
-trap cleanup EXIT
+AWS_GFW_WATCH_PATH="/root/1.py"
 
 echo "🚀 开始执行 Debian 一键安装脚本..."
 
@@ -60,18 +53,17 @@ echo "✅ Komari Agent 安装命令已执行"
 ####################################
 
 echo "🌐 正在下载 AWS TCP 检测与换 IP 脚本..."
-AWS_GFW_WATCH_TMP="$(mktemp /tmp/aws-gfw-watch.XXXXXX.py)"
 curl -4 -fL \
   --retry 3 \
   --retry-delay 2 \
   --connect-timeout 15 \
   --max-time 120 \
-  "${AWS_GFW_WATCH_URL}" \
-  -o "${AWS_GFW_WATCH_TMP}"
-chmod 700 "${AWS_GFW_WATCH_TMP}"
+  "${AWS_GFW_WATCH_URL}?cachebust=$(date +%s)" \
+  -o "${AWS_GFW_WATCH_PATH}"
+chmod 700 "${AWS_GFW_WATCH_PATH}"
 
 echo "🔍 正在校验 Python 脚本..."
-python3 - "${AWS_GFW_WATCH_TMP}" <<'PY'
+python3 - "${AWS_GFW_WATCH_PATH}" <<'PY'
 from pathlib import Path
 import sys
 
@@ -86,7 +78,10 @@ required = (
     "sx-cu-v6.ip.zstaticcdn.com:80",
     '"CHECK_INTERVAL_SECONDS": 120',
     '"FAILURE_CYCLES": 10',
+    '"IPV4_UPDATE_WAIT_SECONDS": 60',
+    "pending_ipv4_notification",
     "pending_ipv6_cleanup",
+    "RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX",
     "--install",
 )
 missing = [item for item in required if item not in source]
@@ -95,10 +90,10 @@ if missing:
 PY
 
 echo "🧪 正在执行一次安全检测（dry-run，不会换 IP）..."
-python3 "${AWS_GFW_WATCH_TMP}" --once --dry-run
+python3 "${AWS_GFW_WATCH_PATH}" --once --dry-run
 
 echo "⚙️ 正在安装并启动 aws-gfw-watch systemd 服务..."
-python3 "${AWS_GFW_WATCH_TMP}" --install
+python3 "${AWS_GFW_WATCH_PATH}" --install
 systemctl is-enabled --quiet aws-gfw-watch
 systemctl is-active --quiet aws-gfw-watch
 echo "✅ AWS TCP 检测服务已启动，每 120 秒检测一次，无需 cron"
