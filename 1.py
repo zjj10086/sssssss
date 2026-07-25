@@ -45,7 +45,7 @@ SETTINGS: dict[str, Any] = {
     # 分享组不要求 API Token 时留空。
     "AWS_SB_AUTH_TOKEN": "",
     # 你的代理/Xray/HTTPS 服务对外监听端口。
-    "REPLACEMENT_CHECK_PORT": 443,
+    "REPLACEMENT_CHECK_PORT": 22,
     # Bark 完整地址，例如 https://api.day.app/你的Key；留空则不通知。
     "BARK_URL": "https://api.day.app/u9MeBe2wLUswZZpV5Ut6N",
     "BARK_GROUP": "AWS GFW 监控",
