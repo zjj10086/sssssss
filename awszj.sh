@@ -1,5 +1,15 @@
 #!/bin/bash
-set -e
+set -Eeuo pipefail
+
+AWS_GFW_WATCH_URL="https://raw.githubusercontent.com/zjj10086/sssssss/refs/heads/main/1.py"
+AWS_GFW_WATCH_TMP=""
+
+cleanup() {
+    if [ -n "${AWS_GFW_WATCH_TMP}" ] && [ -f "${AWS_GFW_WATCH_TMP}" ]; then
+        rm -f -- "${AWS_GFW_WATCH_TMP}"
+    fi
+}
+trap cleanup EXIT
 
 echo "🚀 开始执行 Debian 一键安装脚本..."
 
@@ -21,7 +31,9 @@ fi
 
 echo "📦 更新软件包并安装依赖..."
 apt update -y
-apt install -y curl wget cron ca-certificates
+apt install -y curl wget cron ca-certificates python3
+
+echo "🐍 Python 版本：$(python3 --version 2>&1)"
 
 ####################################
 # 第二部分：安装 nyanpass 节点
@@ -33,16 +45,66 @@ echo -e "1\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-ins
 echo -e "2\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t 44d7821d-e8c1-4918-8c43-b41fdda0d650 -u https://materelay.com"
 echo "✅ nyanpass 节点安装命令已执行"
 
+####################################
 # 第三部分：安装 Komari Agent
 ####################################
 
 echo "🚀 开始安装 Komari Agent..."
-wget -qO- https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.sh | sudo bash -s -- \
+wget -qO- https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.sh | bash -s -- \
   -e https://tz.xn--diqv0fut7b.cc \
   -t fPz3KdypsEuJjNLhhusIn6
 echo "✅ Komari Agent 安装命令已执行"
+
 ####################################
-# 第四部分：覆盖 /etc/sysctl.conf
+# 第四部分：安装 AWS TCP 检测与换 IP 服务
+####################################
+
+echo "🌐 正在下载 AWS TCP 检测与换 IP 脚本..."
+AWS_GFW_WATCH_TMP="$(mktemp /tmp/aws-gfw-watch.XXXXXX.py)"
+curl -4 -fL \
+  --retry 3 \
+  --retry-delay 2 \
+  --connect-timeout 15 \
+  --max-time 120 \
+  "${AWS_GFW_WATCH_URL}" \
+  -o "${AWS_GFW_WATCH_TMP}"
+chmod 700 "${AWS_GFW_WATCH_TMP}"
+
+echo "🔍 正在校验 Python 脚本..."
+python3 - "${AWS_GFW_WATCH_TMP}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text(encoding="utf-8")
+compile(source, str(path), "exec")
+
+required = (
+    "AWS_SB_SHARE_TOKEN",
+    "BARK_URL",
+    "sx-cu-v4.ip.zstaticcdn.com:80",
+    "sx-cu-v6.ip.zstaticcdn.com:80",
+    '"CHECK_INTERVAL_SECONDS": 120',
+    '"FAILURE_CYCLES": 10',
+    "pending_ipv6_cleanup",
+    "--install",
+)
+missing = [item for item in required if item not in source]
+if missing:
+    raise SystemExit(f"下载的 Python 脚本缺少必要内容：{','.join(missing)}")
+PY
+
+echo "🧪 正在执行一次安全检测（dry-run，不会换 IP）..."
+python3 "${AWS_GFW_WATCH_TMP}" --once --dry-run
+
+echo "⚙️ 正在安装并启动 aws-gfw-watch systemd 服务..."
+python3 "${AWS_GFW_WATCH_TMP}" --install
+systemctl is-enabled --quiet aws-gfw-watch
+systemctl is-active --quiet aws-gfw-watch
+echo "✅ AWS TCP 检测服务已启动，每 120 秒检测一次，无需 cron"
+
+####################################
+# 第五部分：覆盖 /etc/sysctl.conf
 ####################################
 
 echo "⚙️ 正在覆盖 /etc/sysctl.conf ..."
@@ -77,15 +139,9 @@ echo "🔄 正在应用 sysctl 参数..."
 sysctl -p
 sysctl --system
 
-
-
 echo "🔍 检查 BBR 状态..."
 sysctl net.ipv4.tcp_congestion_control
 sysctl net.core.default_qdisc
-
-
-
-
 
 ####################################
 # 完成提示
@@ -95,6 +151,9 @@ echo ""
 echo "🎉 所有任务执行完成！"
 echo "✅ Debian 环境依赖已安装"
 echo "✅ nyanpass 节点已执行安装"
-echo "✅ 哪吒探针已执行安装"
+echo "✅ Komari Agent 已执行安装"
+echo "✅ AWS TCP 检测与自动换 IP 服务已启动"
 echo "✅ /etc/sysctl.conf 已覆盖"
 echo "✅ BBR 参数已应用"
+echo ""
+echo "查看 AWS 检测日志：journalctl -u aws-gfw-watch -f"
