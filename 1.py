@@ -86,8 +86,7 @@ SETTINGS: dict[str, Any] = {
 
 IMDS_BASE = "http://169.254.169.254/latest"
 IMDS_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-INSTALL_DIR = Path("/opt/aws-gfw-watch")
-INSTALL_SCRIPT = INSTALL_DIR / "aws_gfw_watch.py"
+INSTALL_SCRIPT = Path("/root/1.py")
 SYSTEMD_UNIT_PATH = Path("/etc/systemd/system/aws-gfw-watch.service")
 SYSTEMD_UNIT = """[Unit]
 Description=AWS GFW TCP probe and IP rotation watcher
@@ -97,7 +96,7 @@ After=network-online.target
 [Service]
 Type=simple
 User=root
-ExecStart=/opt/aws-gfw-watch/aws_gfw_watch.py
+ExecStart=/root/1.py
 Restart=always
 RestartSec=10
 StateDirectory=aws-gfw-watch
@@ -105,7 +104,7 @@ RuntimeDirectory=aws-gfw-watch
 UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true
-ProtectHome=true
+ProtectHome=read-only
 ProtectSystem=strict
 ProtectKernelTunables=true
 ProtectKernelModules=true
@@ -1456,9 +1455,8 @@ def install_service() -> None:
     Config.from_environment()
     source = Path(__file__).resolve()
     source.chmod(0o700)
-    INSTALL_DIR.mkdir(parents=True, exist_ok=True)
     if source != INSTALL_SCRIPT.resolve():
-        fd, temporary_name = tempfile.mkstemp(prefix=".aws_gfw_watch.", dir=INSTALL_DIR)
+        fd, temporary_name = tempfile.mkstemp(prefix=".1.py.", dir=INSTALL_SCRIPT.parent)
         os.close(fd)
         temporary = Path(temporary_name)
         try:
