@@ -309,7 +309,7 @@ class Config:
                 "IPV4_UPDATE_WAIT_SECONDS", 60, minimum=10, maximum=300
             ),
             max_replacements_per_hour=env_int(
-                "MAX_REPLACEMENTS_PER_HOUR", 3, minimum=1, maximum=20
+                "MAX_REPLACEMENTS_PER_HOUR", 3000, minimum=1, maximum=20
             ),
             api_timeout=env_float("API_TIMEOUT_SECONDS", 30, minimum=2, maximum=120),
             replacement_check_port=replacement_check_port,
