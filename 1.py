@@ -79,7 +79,7 @@ SETTINGS: dict[str, Any] = {
     "POST_REPLACE_GRACE_SECONDS": 90,
     "POST_IPV6_REPLACE_GRACE_SECONDS": 180,
     "IPV4_UPDATE_WAIT_SECONDS": 60,
-    "MAX_REPLACEMENTS_PER_HOUR": 3,
+    "MAX_REPLACEMENTS_PER_HOUR": 3000,
     "API_TIMEOUT_SECONDS": 30,
     "STATE_FILE": "/var/lib/aws-gfw-watch/state.json",
     "LOCK_FILE": "/run/aws-gfw-watch/aws-gfw-watch.lock",
