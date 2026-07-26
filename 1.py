@@ -79,7 +79,8 @@ SETTINGS: dict[str, Any] = {
     "POST_REPLACE_GRACE_SECONDS": 90,
     "POST_IPV6_REPLACE_GRACE_SECONDS": 180,
     "IPV4_UPDATE_WAIT_SECONDS": 60,
-    "MAX_REPLACEMENTS_PER_HOUR": 3000,
+    # IPv4、IPv6 分别独立计算，每种地址每小时最多更换 20 次。
+    "MAX_REPLACEMENTS_PER_HOUR": 20,
     "API_TIMEOUT_SECONDS": 30,
     "STATE_FILE": "/var/lib/aws-gfw-watch/state.json",
     "LOCK_FILE": "/run/aws-gfw-watch/aws-gfw-watch.lock",
@@ -309,7 +310,7 @@ class Config:
                 "IPV4_UPDATE_WAIT_SECONDS", 60, minimum=10, maximum=300
             ),
             max_replacements_per_hour=env_int(
-                "MAX_REPLACEMENTS_PER_HOUR", 3000, minimum=1, maximum=20
+                "MAX_REPLACEMENTS_PER_HOUR", 20, minimum=1, maximum=20
             ),
             api_timeout=env_float("API_TIMEOUT_SECONDS", 30, minimum=2, maximum=120),
             replacement_check_port=replacement_check_port,
