@@ -44,7 +44,9 @@ SETTINGS: dict[str, Any] = {
     "AWS_SB_SHARE_TOKEN": "https://aws.sb/#/ec2-instances?sgt=1e794c75779743338b6aa4920ef797f0",
     # 分享组不要求 API Token 时留空。
     "AWS_SB_AUTH_TOKEN": "",
-    # 你的代理/Xray/HTTPS 服务对外监听端口。
+    # False：只使用本机 TCPing 判断，换 IPv4 时不购买小助理 GFW 检测。
+    "AWS_SB_GFW_CHECK": False,
+    # 只在 AWS_SB_GFW_CHECK=True 时使用。
     "REPLACEMENT_CHECK_PORT": 22,
     # Bark 完整地址，例如 https://api.day.app/你的Key；留空则不通知。
     "BARK_URL": "https://api.day.app/u9MeBe2wLUswZZpV5Ut6N",
@@ -249,6 +251,7 @@ class Config:
     ipv4_update_wait_seconds: float
     max_replacements_per_hour: int
     api_timeout: float
+    aws_sb_gfw_check: bool
     replacement_check_port: int | None
     state_file: Path
     bark_url: str = ""
@@ -313,6 +316,7 @@ class Config:
                 "MAX_REPLACEMENTS_PER_HOUR", 20, minimum=1, maximum=20
             ),
             api_timeout=env_float("API_TIMEOUT_SECONDS", 30, minimum=2, maximum=120),
+            aws_sb_gfw_check=env_bool("AWS_SB_GFW_CHECK", False),
             replacement_check_port=replacement_check_port,
             state_file=Path(setting("STATE_FILE")).expanduser(),
             bark_url=normalize_bark_url(setting("BARK_URL")),
@@ -359,6 +363,15 @@ def env_int(
     if maximum is not None and value > maximum:
         raise ConfigurationError(f"{name} 不能大于 {maximum}")
     return value
+
+
+def env_bool(name: str, default: bool) -> bool:
+    raw = setting(name, default).strip().lower()
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    raise ConfigurationError(f"{name} 必须是 true 或 false")
 
 
 def parse_port(value: str, label: str) -> int:
@@ -658,9 +671,11 @@ class AwsSbClient:
         self.verify_target(instance_id, region)
         path_id = urllib.parse.quote(instance_id, safe="")
         url = f"{self.config.api_base}/ec2-instances/{path_id}/ip-address"
-        payload: dict[str, Any] = {"gfw_blocked_check": True}
-        if self.config.replacement_check_port is not None:
-            payload["gfw_blocked_check_port"] = self.config.replacement_check_port
+        payload: dict[str, Any] = {}
+        if self.config.aws_sb_gfw_check:
+            payload["gfw_blocked_check"] = True
+            if self.config.replacement_check_port is not None:
+                payload["gfw_blocked_check_port"] = self.config.replacement_check_port
         headers = {**self._headers(region), "Content-Type": "application/json"}
         request = urllib.request.Request(
             url,
