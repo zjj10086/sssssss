@@ -38,16 +38,7 @@ echo -e "nyanpass\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanp
 echo "✅ nyanpass 节点安装命令已执行"
 
 ####################################
-# 第三部分：安装 Komari Agent 探针
-####################################
 
-echo "🚀 开始安装 Komari Agent 探针..."
-
-wget -qO- https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.sh | bash -s -- \
-  -e https://tz.xn--diqv0fut7b.cc \
-  -t RQqFAmcl8lZZwy5jxsxLFP
-
-echo "✅ Komari Agent 探针安装命令已执行"
 
 ####################################
 # 完成提示
