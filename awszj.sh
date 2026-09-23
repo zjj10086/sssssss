@@ -38,6 +38,7 @@ echo -e "1\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-ins
 echo "✅ nyanpass 节点安装命令已执行"
 
 ####################################
+if false; then
 # 第三部分：安装 Komari Agent
 ####################################
 
@@ -46,6 +47,7 @@ wget -qO- https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/hea
   -e https://tz.xn--diqv0fut7b.cc \
   -t fPz3KdypsEuJjNLhhusIn6
 echo "✅ Komari Agent 安装命令已执行"
+fi
 
 ####################################
 # 第四部分：安装 AWS TCP 检测与换 IP 服务
