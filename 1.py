@@ -41,7 +41,7 @@ from typing import Any, Callable, Iterable
 # =============================================================================
 SETTINGS: dict[str, Any] = {
     # 分享 Token，或带 ?sgt=... 的完整 AWS 小助理分享链接。
-    "AWS_SB_SHARE_TOKEN": "https://aws.sb/#/ec2-instances?sgt=1e794c75779743338b6aa4920ef797f0",
+    "AWS_SB_SHARE_TOKEN": "https://aws.sb/#/ec2-instances?sgt=17ad7dbb25934d0cb3bc8d2cbe459299",
     # 分享组不要求 API Token 时留空。
     "AWS_SB_AUTH_TOKEN": "",
     # False：只使用本机 TCPing 判断，换 IPv4 时不购买小助理 GFW 检测。
