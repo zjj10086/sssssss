@@ -35,6 +35,8 @@ echo "🐍 Python 版本：$(python3 --version 2>&1)"
 echo "🚀 开始安装 nyanpass 节点..."
 echo -e "nyanpass\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t 90a1ff7e-b2a2-41d7-88ac-8e4d253086c9 -u https://ny.qwqa.link"
 echo -e "1\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t e2cffc11-ba17-4de5-8d17-7b5719d43680 -u https://ny.qwqa.link"
+echo -e "2\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-t a86714b2-b826-4165-9ae9-9186cabe2275 -u https://materelay.com"
+echo -e "3\ny\ny" | bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_nodeclient "-o -t 084ee926-c4c5-479c-8c59-a98ae33401a2 -u https://materelay.com"
 echo "✅ nyanpass 节点安装命令已执行"
 
 ####################################
